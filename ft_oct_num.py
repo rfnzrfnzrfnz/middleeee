@@ -4,5 +4,3 @@ def ft_oct_num(n):
         b = str(n % 8) + b
         n = n // 8
     return b
-
-

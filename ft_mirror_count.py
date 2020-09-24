@@ -19,6 +19,7 @@ def ft_rew_num(a):
             p = p + k
         return p
 
+
 def ft_mirror_count(a):
     n = 0
     i = 1
@@ -28,5 +29,3 @@ def ft_mirror_count(a):
             n = n + 1
         i = i + 1
     return n
-
-

@@ -6,5 +6,3 @@ def ft_max_num(a):
             m = a % 10
         a = a // 10
         return m
-
-

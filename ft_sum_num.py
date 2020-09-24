@@ -4,5 +4,3 @@ def ft_sum_num(a):
         result += a % 10
         a //= 10
     return result
-
-print(ft_sum_num(123))

@@ -19,6 +19,7 @@ def ft_rew_num(a):
             p = p + k
         return p
 
+
 def ft_mirror_num(a):
     c = ft_rew_num(a)
     if c == a:
@@ -26,5 +27,5 @@ def ft_mirror_num(a):
     else:
         return False
 
-print(ft_mirror_num(1221))
+
 

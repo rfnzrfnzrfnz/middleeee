@@ -1,0 +1,256 @@
+#include <iostream>
+#include <vector>
+#include <map>
+#include <iomanip>
+
+// Базовый класс товара
+class Product {
+public:
+    double cost;
+    std::string name;
+    std::string descr;
+
+    Product(double cost, const std::string& name, const std::string& descr)
+        : cost(cost), name(name), descr(descr) {}
+
+    virtual void print() {
+        std::cout << "Цена: " << cost << std::endl;
+        std::cout << "Наименование: " << name << std::endl;
+        std::cout << "Описание: " << descr << std::endl;
+    }
+};
+
+// Класс одежды
+class Clothes : public Product {
+private:
+    std::string size;
+    std::string sex;
+
+public:
+    Clothes(double cost, const std::string& name, const std::string& descr, const std::string& size, const std::string& sex)
+        : Product(cost, name, descr), size(size), sex(sex) {}
+
+    void print() override {
+        Product::print();
+        std::cout << "Размер: " << size << std::endl;
+        std::cout << "Пол: " << sex << std::endl;
+    }
+};
+
+// Класс мебели
+class Furniture : public Product {
+private:
+    std::string material;
+    std::string color;
+    double sizeX, sizeY;
+
+public:
+    Furniture(double cost, const std::string& name, const std::string& descr, const std::string& material, const std::string& color, double sizeX, double sizeY)
+        : Product(cost, name, descr), material(material), color(color), sizeX(sizeX), sizeY(sizeY) {}
+
+    void print() override {
+        Product::print();
+        std::cout << "Материал: " << material << std::endl;
+        std::cout << "Цвет: " << color << std::endl;
+        std::cout << "Размер: " << sizeX << "x" << sizeY << std::endl;
+    }
+};
+
+// Класс корзины
+class Basket {
+private:
+    std::map<const Product*, int> items;
+    double totalCost;
+
+public:
+    int numOfThings() {
+        int count = 0;
+
+        for (const auto& item : items) {
+            count += item.second;
+        }
+        return count;
+    }
+
+    void printThings() {
+        for (const auto& item : items) {
+            std::cout << item.first->name << ": " << item.second << " шт." << std::endl;
+        }
+    }
+
+    double printTotalCost() {
+        return totalCost;
+    }
+
+    void addThings(const Product* product, int quantity) {
+        if (items.find(product) != items.end()) {
+            items[product] += quantity;
+        }
+        else {
+            items[product] = quantity;
+        }
+        totalCost += product->cost * quantity;
+    }
+
+    void removeThings(const Product* product, int quantity) {
+        if (items.find(product) != items.end()) {
+            if (items[product] >= quantity) {
+                items[product] -= quantity;
+                totalCost -= product->cost * quantity;
+                if (items[product] == 0) {
+                    items.erase(product);
+                }
+            }
+            else {
+                std::cout << "Недостаточно товара в корзине." << std::endl;
+            }
+        }
+        else {
+            std::cout << "Товара нет в корзине." << std::endl;
+        }
+    }
+};
+
+int main() {
+    // Создание товаров
+    setlocale(LC_ALL, "Russian");
+    std::vector<Product*> products;
+    products.push_back(new Clothes(49.99, "Футболка", "Хлопковая футболка", "M", "men"));
+    products.push_back(new Clothes(29.99, "Шорты", "Летние шорты", "L", "woman"));
+    products.push_back(new Furniture(199.99, "Стол", "Деревянный стол", "wood", "brown", 120.0, 80.0));
+    products.push_back(new Furniture(99.99, "Стул", "Пластиковый стул", "plastic", "white", 50.0, 50.0));
+
+    Basket basket;
+
+
+    int choice;
+    while (true) {
+        std::cout << "Режим магазина:" << std::endl;
+        std::cout << "1. Одежда" << std::endl;
+        std::cout << "2. Мебель" << std::endl;
+        std::cout << "3. Корзина" << std::endl;
+        std::cout << "4. Выход" << std::endl;
+        std::cout << "Ваш выбор: ";
+        std::cin >> choice;
+
+        switch (choice) {
+        case 1: // Одежда
+            std::cout << "Доступные товары (одежда):" << std::endl;
+            for (const auto& product : products) {
+                if (dynamic_cast<Clothes*>(product)) {
+                    product->print();
+                    std::cout << std::endl;
+                }
+            }
+            std::cout << "1. Добавить товар в корзину" << std::endl;
+            std::cout << "2. В предыдущее меню" << std::endl;
+            std::cin >> choice;
+            if (choice == 1) {
+                int position;
+                int quantity;
+                std::cout << "Введите номер позиции: ";
+                std::cin >> position;
+                std::cout << "Введите количество: ";
+                std::cin >> quantity;
+                if (position >= 1 && position <= products.size()) {
+                    Clothes* clothes = dynamic_cast<Clothes*>(products[position - 1]);
+                    if (clothes) {
+                        basket.addThings(clothes, quantity);
+                        std::cout << "Товар добавлен в корзину." << std::endl;
+                    }
+                    else {
+                        std::cout << "Выбранный товар не является одеждой." << std::endl;
+                    }
+                }
+                else {
+                    std::cout << "Неверный номер позиции." << std::endl;
+                }
+            }
+            break;
+
+        case 2: // Мебель
+            std::cout << "Доступные товары (мебель):" << std::endl;
+            for (const auto& product : products) {
+                if (dynamic_cast<Furniture*>(product)) {
+                    product->print();
+                    std::cout << std::endl;
+                }
+            }
+            std::cout << "1. Добавить товар в корзину" << std::endl;
+            std::cout << "2. В предыдущее меню" << std::endl;
+            std::cin >> choice;
+            if (choice == 1) {
+                int position;
+                int quantity;
+                std::cout << "Введите номер позиции: ";
+                std::cin >> position;
+                std::cout << "Введите количество: ";
+                std::cin >> quantity;
+                if (position >= 1 && position <= products.size()) {
+                    Furniture* furniture = dynamic_cast<Furniture*>(products[position - 1]);
+                    if (furniture) {
+                        basket.addThings(furniture, quantity);
+                        std::cout << "Товар добавлен в корзину." << std::endl;
+                    }
+                    else {
+                        std::cout << "Выбранный товар не является мебелью." << std::endl;
+                    }
+                }
+                else {
+                    std::cout << "Неверный номер позиции." << std::endl;
+                }
+            }
+            break;
+
+        case 3: // Корзина
+            std::cout << "Содержимое корзины:" << std::endl;
+            basket.printThings();
+            std::cout << "Общая стоимость: " << std::fixed << std::setprecision(2) << basket.printTotalCost() << " руб." << std::endl;
+            std::cout << "Общее количество товаров: " << basket.numOfThings() << std::endl;
+            std::cout << "1. Удалить из корзины" << std::endl;
+            std::cout << "2. Оформить заказ" << std::endl;
+            std::cout << "3. В предыдущее меню" << std::endl;
+            std::cin >> choice;
+            if (choice == 1) {
+                int position;
+                int quantity;
+                std::cout << "Введите номер позиции: ";
+                std::cin >> position;
+                std::cout << "Введите количество: ";
+                std::cin >> quantity;
+               // if (position >= 1 && position <= basket.numOfThings()) {
+                  //  int i = 0;
+                   // for (const auto& item : basket.items) {
+                    //    if (i == position - 1) {
+                     //       basket.removeThings(item.first, quantity);
+                     //       break;
+                      //  }
+                       // i++;
+                   // }
+               // }
+               // else {
+                    std::cout << "Неверный номер позиции." << std::endl;
+               // }
+            }
+            else if (choice == 2) {
+                std::cout << "Заказ оформлен." << std::endl;
+            }
+            break;
+
+        case 4: // Выход
+            std::cout << "Выход из режима магазина." << std::endl;
+            return 0;
+
+        default:
+            std::cout << "Неверный выбор." << std::endl;
+            break;
+        }
+    }
+
+    // Очистка памяти
+    for (auto product : products) {
+        delete product;
+    }
+
+    return 0;
+}
